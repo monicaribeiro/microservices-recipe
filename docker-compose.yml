@@ -1,0 +1,54 @@
+version: "2"
+services:
+  consul:
+    image: "progrium/consul:latest"
+    container_name: "consul"
+    hostname: "consul"
+    ports:
+      - "8400:8400"
+      - "8500:8500"
+      - "8600:53"
+      - "172.17.0.1:53:53/udp"
+    command: "-server -bootstrap-expect 3 -ui-dir /ui"
+
+  consul2:
+    image: "progrium/consul:latest"
+    container_name: "consul2"
+    hostname: "consul2"
+    expose:
+      - "8400"
+      - "8500"
+      - "8600"
+    command: "-server -join consul"
+    depends_on:
+      - consul
+
+  consul3:
+    image: "progrium/consul:latest"
+    container_name: "consul3"
+    hostname: "consul3"
+    expose:
+      - "8400"
+      - "8500"
+      - "8600"
+    command: "-server -join consul"
+    depends_on:
+      - consul
+      
+  registrator:
+    command:  -ip=172.17.0.1 consul://consul:8500
+    image: gliderlabs/registrator:latest
+    volumes:
+      - "/var/run/docker.sock:/tmp/docker.sock"
+    links:
+      - consul
+
+  rabbitmq:
+    image: rabbitmq:management
+    privileged: true
+    environment:
+      - ERL_EPMD_PORT=55950
+    ports:
+      - "55950:55950"
+      - "5672:5672"
+      - "8080:15672"

@@ -1,0 +1,23 @@
+version: "2"
+services:
+  producer:
+    build: ./producer
+    dns: 
+      - 172.17.0.1
+    dns_search: service.consul
+    ports:
+      - "3000"
+    environment:
+      SERVICE_NAME: producer-service
+      SERVICE_TAGS: production
+
+  consumer:
+    build: ./consumer
+    dns: 
+      - 172.17.0.1
+    dns_search: service.consul
+    ports:
+      - "3001"
+    environment:
+      SERVICE_NAME: consumer-service
+      SERVICE_TAGS: production
